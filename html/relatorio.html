@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório</title>
+    <link rel="stylesheet" href="/css/relatorio.css">
+</head>
+<body>
+    <h1>Relatório de Registro de Pontos</h1>
+
+    <!-- Formulário de Seleção de Data -->
+    <div>
+        <label for="dataInicial">Data Inicial:</label>
+        <input type="date" id="dataInicial">
+        <label for="dataFinal">Data Final:</label>
+        <input type="date" id="dataFinal">
+        <button onclick="renderList()">Gerar Relatório</button>
+    </div>
+
+    <div id="registros-relatorio">
+        <!-- Lista de registros será gerada dinamicamente -->
+    </div>
+
+    <!-- Modal para editar registros -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Editar Registro</h2>
+            <p id="modalDate"></p>
+            <div id="modalBody">
+                <!-- Os registros do dia serão carregados aqui -->
+            </div>
+            <button onclick="saveChanges()">Salvar Alterações</button>
+        </div>
+    </div>
+
+    <script src="/js/relatorio.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Ponto</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/html/relatorio.html">relatorio</a></li>
+                <li><a href="/html/criaUsuario.html">criar usuario</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="alerta-registro-ponto" class="hidden">
+        <p>Ponto registrado com sucesso</p>
+        <button id="alerta-registro-ponto-fechar">X</button>
+    </div>
+    <div class="data-hora">
+        <p id="dia-semana"></p>
+        <p id="dia-mes-ano"></p>
+        <p id="hora-min-seg"></p>
+    </div>
+    <div id="div-btn-bater-ponto">
+        <button id="btn-bater-ponto">Bater ponto!</button>
+    </div>
+    <dialog id="dialog-ponto">
+        <p id="dialog-data"></p>
+        <div id="hora-container">
+            <p id="dialog-hora"></p>
+            <!-- Este campo será inserido somente quando o usuário selecionar uma data anterior -->
+            <label for="hora-input" id="hora-label" style="display: none;">Hora:</label>
+            <input type="time" id="hora-input" style="display: none;">
+          </div>
+        <select name="tipos-ponto" id="tipos-ponto">
+            <option value="entrada">Entrada</option>
+            <option value="intervalo">Intervalo</option>
+            <option value="volta-intervalo">Volta Intervalo</option>
+            <option value="saida">Saída</option>
+        </select>
+        <button id="btn-dialog-bater-ponto">Registrar ponto</button>
+        <p id="dialog-last-register"></p>
+        <button id="btn-dialog-fechar">X</button>
+    </dialog>
+    <!-- TO-DO: -->
+    <!-- criar histórico dos últimos n registros-->
+    <script src="js/index.js"></script>
+</body>
+</html>
