@@ -99,31 +99,38 @@ function openModal(date, registros) {
     modalDate.textContent = `Data: ${date}`;
     modalBody.innerHTML = '';
 
-    registros.forEach((registro, index) => {
-        const container = document.createElement('div');
-        container.classList.add('registro-item');
+    if (registros.length > 0) {
+        registros.forEach((registro, index) => {
+            const container = document.createElement('div');
+            container.classList.add('registro-item');
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = `${registro.tipo}: ${registro.hora}`;
-        input.dataset.index = index;
+            // Campo de entrada para edição
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = `${registro.tipo}: ${registro.hora}`;
+            input.dataset.index = index;
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Excluir';
-        deleteButton.classList.add('delete-button');
-        deleteButton.addEventListener('click', () => {
-            container.remove();
-            registros.splice(index, 1); // Remove o registro do array local
+            // Botão de exclusão
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Excluir';
+            deleteButton.classList.add('delete-button');
+            deleteButton.addEventListener('click', () => {
+                alert('O registro de ponto não pode ser excluído.');
+            });
+
+            container.appendChild(input);
+            container.appendChild(deleteButton);
+            modalBody.appendChild(container);
         });
+    } else {
+        modalBody.innerHTML = `<p>Nenhum registro para esta data.</p>`;
+    }
 
-        container.appendChild(input);
-        container.appendChild(deleteButton);
-        modalBody.appendChild(container);
-    });
-
+    // Vincula o modal com a data atual
     modal.dataset.date = date;
     modal.style.display = 'flex';
 }
+
 
 
 function closeModal() {

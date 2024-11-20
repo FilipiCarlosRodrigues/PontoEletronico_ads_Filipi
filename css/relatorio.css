@@ -114,14 +114,15 @@ footer {
 }
 
 .delete-button {
-    background-color: red;
+    background-color: gray;
     color: white;
     border: none;
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 5px;
+    font-size: 0.9em;
 }
 
 .delete-button:hover {
-    background-color: darkred;
+    background-color: darkgray;
 }
