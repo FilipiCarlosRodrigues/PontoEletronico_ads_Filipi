@@ -1,17 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/criaUsuario.css" />
     <title>Criação de Usuário</title>
-</head>
-<body>
-    <input id="nome" placeholder="Nome" type="text">
-    <input id="email" placeholder="Email" type="text">
-    <input id="login" placeholder="Login" type="text">
-    <input id="senha" placeholder="Senha" type="text">
-    <input id="tipo" placeholder="Tipo" type="text">
-    <button id="btn-criar-usuario">Criar usuário</button>
+  </head>
+  <body>
+    <header>
+      <div class="btn-container">
+        <button onclick="history.back()" class="btn-secondary voltar">
+          Voltar
+        </button>
+      </div>
+      <nav class="nav-bar">
+        <ul>
+          <li><a href="/html/relatorio.html">Relatório</a></li>
+          <li><a href="/html/criaUsuario.html">Criar Usuário</a></li>
+        </ul>
+      </nav>
+    </header>
 
-    <script src="/js/criaUsuario.js"></script> 
+    <main>
+      <h1 class="titulo">Criar Novo Usuário</h1>
+      <form class="formulario-usuario">
+        <input id="nome" placeholder="Nome" type="text" required />
+        <input id="email" placeholder="Email" type="email" required />
+        <input id="login" placeholder="Login" type="text" required />
+        <input id="senha" placeholder="Senha" type="password" required />
+        <select id="tipo" required>
+          <option value="" disabled selected>Selecione o Tipo</option>
+          <option value="admin">Admin</option>
+          <option value="usuario">Usuário</option>
+        </select>
+        <button id="btn-criar-usuario" type="submit">Criar Usuário</button>
+      </form>
+    </main>
+
+    <script src="/js/criaUsuario.js"></script>
+  </body>
 </html>

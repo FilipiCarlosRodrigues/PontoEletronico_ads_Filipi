@@ -42,18 +42,24 @@ function renderList() {
         const divRegistro = document.createElement("div");
         divRegistro.classList.add("registro");
 
+        const dayOfWeek = getDayOfWeek(dateString);
+
         if (registrosDoDia.length > 0) {
             const pontosHTML = registrosDoDia
-                .map(reg => `<p>${reg.tipo.charAt(0).toUpperCase() + reg.tipo.slice(1)}: ${reg.hora}</p>`)
+                .map(reg => `
+                    <p>
+                        ${reg.tipo.charAt(0).toUpperCase() + reg.tipo.slice(1)}: ${reg.hora}
+                        ${reg.dataAlterada ? '<span class="alterado">(Alterado)</span>' : ''}
+                    </p>`)
                 .join("");
 
             divRegistro.innerHTML = `
-                <p><strong>${dateString} (${getDayOfWeek(dateString)})</strong></p>
+                <p><strong>${dateString} (${dayOfWeek})</strong></p>
                 ${pontosHTML}
             `;
         } else {
             divRegistro.innerHTML = `
-                <p><strong>${dateString} (${getDayOfWeek(dateString)})</strong></p>
+                <p><strong>${dateString} (${dayOfWeek})</strong></p>
                 <p>Sem registro de ponto</p>
             `;
         }
@@ -97,20 +103,54 @@ function openModal(date, registros) {
     const modalBody = document.getElementById('modalBody');
 
     modalDate.textContent = `Data: ${date}`;
-    modalBody.innerHTML = '';
+    modalBody.innerHTML = ''; // Limpa o conteúdo do modal
 
+    // Campo para justificar a falta
+    const justifyContainer = document.createElement('div');
+    justifyContainer.classList.add('justify-container');
+
+    const justifyLabel = document.createElement('label');
+    justifyLabel.textContent = "Justificativa:";
+    justifyLabel.setAttribute('for', 'justificativaInput');
+
+    const justifyInput = document.createElement('textarea');
+    justifyInput.id = 'justificativaInput';
+    justifyInput.rows = 3;
+    justifyInput.placeholder = "Digite aqui sua justificativa (opcional).";
+
+    justifyContainer.appendChild(justifyLabel);
+    justifyContainer.appendChild(justifyInput);
+
+    // Botão para upload de arquivos
+    const uploadContainer = document.createElement('div');
+    uploadContainer.classList.add('upload-container');
+
+    const uploadLabel = document.createElement('label');
+    uploadLabel.textContent = "Anexar documento:";
+    uploadLabel.setAttribute('for', 'uploadInput');
+
+    const uploadInput = document.createElement('input');
+    uploadInput.type = 'file';
+    uploadInput.id = 'uploadInput';
+
+    uploadContainer.appendChild(uploadLabel);
+    uploadContainer.appendChild(uploadInput);
+
+    // Adiciona a justificativa e o upload ao modal
+    modalBody.appendChild(justifyContainer);
+    modalBody.appendChild(uploadContainer);
+
+    // Adiciona os registros (se houver)
     if (registros.length > 0) {
         registros.forEach((registro, index) => {
             const container = document.createElement('div');
             container.classList.add('registro-item');
 
-            // Campo de entrada para edição
             const input = document.createElement('input');
             input.type = 'text';
             input.value = `${registro.tipo}: ${registro.hora}`;
             input.dataset.index = index;
 
-            // Botão de exclusão
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Excluir';
             deleteButton.classList.add('delete-button');
@@ -123,13 +163,22 @@ function openModal(date, registros) {
             modalBody.appendChild(container);
         });
     } else {
-        modalBody.innerHTML = `<p>Nenhum registro para esta data.</p>`;
+        modalBody.innerHTML += `<p>Nenhum registro para esta data.</p>`;
     }
+
+    // Adiciona o botão de salvar alterações
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Salvar Alterações';
+    saveButton.classList.add('save-button');
+    saveButton.addEventListener('click', saveChanges); // Salvar as mudanças
+    modalBody.appendChild(saveButton);
 
     // Vincula o modal com a data atual
     modal.dataset.date = date;
     modal.style.display = 'flex';
 }
+
+
 
 
 
@@ -143,43 +192,68 @@ function saveChanges() {
     const modalBody = document.getElementById('modalBody');
     const date = modal.dataset.date;
     const inputs = modalBody.querySelectorAll('input');
+    const justificativaInput = document.getElementById('justificativaInput');
+    const uploadInput = document.getElementById('uploadInput');
 
+    // Recupera os registros armazenados no localStorage
     const registers = JSON.parse(localStorage.getItem("register")) || [];
-    const registrosPorData = registers.reduce((acc, registro) => {
-        const dataFormatada = formatDateToISO(registro.data);
-        if (!acc[dataFormatada]) acc[dataFormatada] = [];
-        acc[dataFormatada].push(registro);
-        return acc;
-    }, {});
+    
+    // Atualiza ou cria registros para a data do modal
+    let registrosDoDia = registers.filter(registro => registro.data === date);
+    
+    // Limpa os registros antigos
+    registrosDoDia = [];
 
-    const registrosDoDia = registrosPorData[date] || [];
+    // Recupera a justificativa
+    const justificativa = justificativaInput.value.trim();
 
-    // Atualiza ou exclui registros com base nos inputs restantes no modal
-    registrosDoDia.length = 0; // Limpa os registros antigos do dia
-    inputs.forEach(input => {
-        const [tipo, ...rest] = input.value.split(':');
-        const hora = rest.join(':').trim(); // Junta o restante
-        registrosDoDia.push({
-            tipo: tipo.toLowerCase(),
-            hora: formatTime(hora),
-            data: date // Garante que o campo "data" está presente
+    // Recupera o arquivo (se houver)
+    let fileData = null;
+    if (uploadInput.files.length > 0) {
+        const file = uploadInput.files[0];
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            // Armazenamos o arquivo como base64
+            fileData = reader.result;
+
+            // Atualiza os registros com a justificativa e arquivo (depois de ler o arquivo)
+            updateRegistersWithFile(fileData, justificativa);
+        };
+        reader.readAsDataURL(file); // Lê o arquivo como base64
+    } else {
+        // Se não houver arquivo, apenas salvar a justificativa
+        updateRegistersWithFile(null, justificativa);
+    }
+
+    // Função que faz o update nos registros
+    function updateRegistersWithFile(fileData, justificativa) {
+        inputs.forEach(input => {
+            const [tipo, ...rest] = input.value.split(':');
+            const hora = rest.join(':').trim(); // Junta o restante como hora
+            if (tipo && hora) {
+                registrosDoDia.push({
+                    tipo: tipo.toLowerCase(),
+                    hora: formatTime(hora),
+                    data: date,
+                    justificativa: justificativa, // Salva a justificativa
+                    arquivo: fileData, // Salva os dados do arquivo (base64 ou null)
+                    dataAlterada: true // Marca como alterado
+                });
+            }
         });
-    });
 
-    // Atualiza os registros no localStorage
-    const updatedRegisters = Object.entries(registrosPorData).flatMap(([data, registros]) => {
-        return registros.map(registro => ({
-            ...registro,
-            data
-        }));
-    });
+        // Atualiza os registros no localStorage
+        const updatedRegisters = [...registers.filter(registro => registro.data !== date), ...registrosDoDia];
+        localStorage.setItem("register", JSON.stringify(updatedRegisters));
 
-    localStorage.setItem("register", JSON.stringify(updatedRegisters));
-
-    alert('Alterações salvas com sucesso!');
-    closeModal();
-    renderList();
+        // Feedback para o usuário
+        alert('Alterações salvas com sucesso!');
+        closeModal();
+        renderList(); // Re-renderiza a lista com os dados atualizados
+    }
 }
+
+
 
 
 
